@@ -114,6 +114,17 @@
             margin: 2px 0 0;
         }
 
+        .controls-instruction {
+            margin: 2px 0 0;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px dashed rgba(16, 33, 56, 0.2);
+            color: #33485f;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
         main {
             display: grid;
             grid-template-columns: minmax(230px, 280px) minmax(0, 1fr);
@@ -416,6 +427,7 @@
         </div>
 
         <div class="status-pill" id="status-pill" aria-live="polite">Mode: Male | Selected: None</div>
+        <p class="controls-instruction">Click a highlighted part to zoom in and read its description.</p>
     </aside>
 
     <div class="diagram-container">
