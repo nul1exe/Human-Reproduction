@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Human Reproductive System</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Space+Grotesk:wght@400;700&display=swap');
+
+        :root {
+            --primary: #102138;
+            --accent-male: #1c8de7;
+            --accent-female: #d63a66;
+            --bg: #e8efe9;
+            --glass: rgba(255, 255, 255, 0.78);
+            --ink-soft: #5c6772;
+            --panel-shadow: 0 16px 40px rgba(16, 33, 56, 0.15);
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: radial-gradient(circle at 15% 20%, #f4fff8, #e8efe9 35%, #d7e4de 100%);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 1.15rem 1rem;
+            background: linear-gradient(125deg, #0e1d33, #1b3556 60%, #244767);
+            color: white;
+            width: 100%;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+            position: relative;
+        }
+
+        header h1 {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: 0.03em;
+            margin: 0;
+            font-weight: 800;
+            font-size: clamp(1.25rem, 2.8vw, 1.95rem);
+        }
+
+        .toggle-container {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 25px;
+            transition: 0.28s ease;
+            font-weight: bold;
+            box-shadow: 0 8px 16px rgba(16, 33, 56, 0.18);
+        }
+
+        .btn-male { background: var(--accent-male); color: white; }
+        .btn-female { background: var(--accent-female); color: white; }
+        .btn:hover { opacity: 0.88; transform: translateY(-3px) scale(1.02); }
+
+        .btn.is-active {
+            outline: 3px solid rgba(255, 255, 255, 0.72);
+            outline-offset: 2px;
+            transform: translateY(-2px);
+        }
+
+        .view-toggle {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        .view-toggle.hidden {
+            display: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.82);
+            color: #213449;
+        }
+
+        .btn-secondary.is-active {
+            background: #ffffff;
+            outline: 3px solid rgba(16, 33, 56, 0.14);
+        }
+
+        .btn:focus-visible {
+            outline: 3px solid rgba(16, 33, 56, 0.35);
+            outline-offset: 2px;
+        }
+
+        .status-pill {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(16, 33, 56, 0.14);
+            color: #213449;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 0.9rem;
+            box-shadow: 0 6px 12px rgba(16, 33, 56, 0.09);
+            margin: 2px 0 0;
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: minmax(230px, 280px) minmax(0, 1fr);
+            gap: 20px;
+            max-width: 1160px;
+            width: min(95%, 1160px);
+            margin: 24px auto 50px;
+            align-items: start;
+        }
+
+        .controls-panel {
+            background: var(--glass);
+            border-radius: 15px;
+            box-shadow: var(--panel-shadow);
+            border: 1px solid rgba(16, 33, 56, 0.12);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: sticky;
+            top: 16px;
+        }
+
+        .diagram-container {
+            flex: 1;
+            background: var(--glass);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--panel-shadow);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 500px;
+            position: relative;
+            overflow: hidden;
+            perspective: 1200px;
+        }
+
+        .diagram-container::before {
+            content: "";
+            position: absolute;
+            inset: -30%;
+            background: conic-gradient(from 120deg, rgba(28, 141, 231, 0.14), rgba(214, 58, 102, 0.06), rgba(16, 33, 56, 0.11));
+            filter: blur(20px);
+            animation: swirl 16s linear infinite;
+            z-index: 0;
+        }
+
+        .diagram-stage {
+            width: min(430px, 100%);
+            aspect-ratio: 1 / 1;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: floatStage 5s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        .svg-wrapper {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+            transform-origin: top left;
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        .anatomy-frame {
+            position: relative;
+            width: min(100%, 400px);
+            transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+            pointer-events: auto;
+        }
+
+        .male-frame {
+            aspect-ratio: 322 / 507;
+            width: min(92%, 360px);
+        }
+
+        .female-frame {
+            aspect-ratio: 4210 / 3256;
+        }
+
+        .scanline {
+            position: absolute;
+            left: 8%;
+            right: 8%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+            top: 18%;
+            animation: scan 3.2s ease-in-out infinite;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .organ-popup {
+            position: absolute;
+            left: 50%;
+            bottom: 18px;
+            transform: translateX(-50%) translateY(16px);
+            width: min(92%, 520px);
+            padding: 16px 18px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.94);
+            border: 1px solid rgba(16, 33, 56, 0.15);
+            box-shadow: 0 14px 28px rgba(16, 33, 56, 0.22);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.35s ease, opacity 0.35s ease;
+            z-index: 3;
+            backdrop-filter: blur(4px);
+        }
+
+        .organ-popup.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .organ-popup h3 {
+            margin: 0 0 8px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.3rem;
+            color: var(--accent-male);
+            line-height: 1.2;
+        }
+
+        .female-mode .organ-popup h3 {
+            color: var(--accent-female);
+        }
+
+        .organ-popup p {
+            margin: 0;
+            color: #45505c;
+            line-height: 1.55;
+            font-size: 0.98rem;
+        }
+
+        #popup-phys {
+            margin-top: 8px;
+            font-style: italic;
+            color: var(--ink-soft);
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 18px 22px rgba(16, 33, 56, 0.24));
+        }
+
+        .anatomy-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            z-index: 1;
+        }
+
+        .image-overlay {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        .clickable-region {
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            opacity: 0;
+        }
+
+        .clickable-region:hover {
+            opacity: 0.15 !important;
+        }
+
+        .organ-path {
+            fill: #b8c2cc;
+            stroke: #fff;
+            stroke-width: 2;
+            cursor: pointer;
+            transition: 0.26s ease;
+        }
+
+        .organ-path:hover {
+            fill: #9daab6 !important;
+            filter: brightness(1.06);
+        }
+
+        .organ-path:focus-visible {
+            outline: none;
+            stroke: #ffffff;
+            stroke-width: 3;
+            filter: brightness(1.16);
+        }
+
+        .hidden { display: none; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .active-part {
+            animation: pulse 0.5s ease-in-out;
+            fill: var(--accent-male) !important;
+            filter: drop-shadow(0 0 6px rgba(28, 141, 231, 0.65));
+        }
+        .female-mode .active-part {
+            fill: var(--accent-female) !important;
+            filter: drop-shadow(0 0 6px rgba(214, 58, 102, 0.65));
+        }
+
+        .zooming .organ-path:not(.active-part) {
+            opacity: 0.3;
+        }
+
+        @keyframes floatStage {
+            0%, 100% { transform: rotateX(8deg) rotateY(-5deg) translateY(0px); }
+            50% { transform: rotateX(10deg) rotateY(6deg) translateY(-10px); }
+        }
+
+        @keyframes swirl {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes scan {
+            0%, 100% { top: 18%; opacity: 0.55; }
+            50% { top: 84%; opacity: 1; }
+        }
+
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+                width: min(94%, 1160px);
+                margin-top: 14px;
+            }
+
+            .controls-panel {
+                position: static;
+            }
+
+            .toggle-container,
+            .view-toggle {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .diagram-container {
+                min-height: 420px;
+            }
+
+            .organ-popup {
+                width: min(94%, 440px);
+                padding: 14px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .diagram-stage,
+            .scanline,
+            .diagram-container::before,
+            .svg-wrapper,
+            .organ-popup,
+            .btn {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Human Reproduction: Anatomy & Physiology</h1>
+</header>
+
+<main id="app-container">
+    <aside class="controls-panel">
+        <div class="toggle-container">
+            <button class="btn btn-male is-active" id="male-btn" onclick="switchSystem('male')">Male System</button>
+            <button class="btn btn-female" id="female-btn" onclick="switchSystem('female')">Female System</button>
+        </div>
+
+        <div class="view-toggle" id="male-view-toggle">
+            <button class="btn btn-secondary is-active" id="male-external-btn" onclick="switchMaleView('external')">Male External</button>
+            <button class="btn btn-secondary" id="male-internal-btn" onclick="switchMaleView('internal')">Male Internal</button>
+        </div>
+
+        <div class="view-toggle hidden" id="female-view-toggle">
+            <button class="btn btn-secondary" id="female-external-btn" onclick="switchFemaleView('external')">Female External</button>
+            <button class="btn btn-secondary is-active" id="female-internal-btn" onclick="switchFemaleView('internal')">Female Internal</button>
+        </div>
+
+        <div class="status-pill" id="status-pill" aria-live="polite">Mode: Male | Selected: None</div>
+    </aside>
+
+    <div class="diagram-container">
+        <div class="scanline"></div>
+        <div class="diagram-stage" id="diagram-stage">
+            <div class="svg-wrapper" id="male-external-wrapper">
+                <div class="anatomy-frame male-frame">
+                    <img src="male-anatomy.png" alt="Male Reproductive System" class="anatomy-image" />
+                    <svg class="image-overlay" viewBox="0 0 322 507" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                        <rect id="shaft" class="clickable-region organ-path" x="96" y="24" width="132" height="278" rx="58" />
+                        <path id="corona" class="clickable-region organ-path" d="M 88 324 C 116 300, 206 300, 234 324 C 214 340, 108 340, 88 324 Z" />
+                        <path id="glans" class="clickable-region organ-path" d="M 126 340 C 114 360, 114 412, 126 436 C 136 452, 192 452, 202 436 C 214 412, 214 360, 202 340 C 190 324, 138 324, 126 340 Z" />
+                        <path id="scrotum" class="clickable-region organ-path" d="M 34 302 C 22 386, 42 475, 106 499 C 132 507, 190 507, 217 499 C 279 478, 301 387, 288 302 C 260 346, 239 368, 217 382 C 192 398, 130 398, 106 382 C 82 367, 62 346, 34 302 Z" />
+                        <rect id="urethral-opening-male" class="clickable-region organ-path" x="168" y="418" width="12" height="17" rx="2" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="svg-wrapper hidden" id="male-internal-wrapper">
+                <div class="anatomy-frame male-frame">
+                    <img src="male-internal.png" alt="Male Internal Reproductive Anatomy" class="anatomy-image" />
+                    <svg class="image-overlay" viewBox="0 0 768 1152" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse id="testes-l" class="clickable-region organ-path" cx="140" cy="898" rx="72" ry="80" />
+                        <ellipse id="testes-r" class="clickable-region organ-path" cx="634" cy="898" rx="72" ry="80" />
+
+                        <path id="epididymis-l" class="clickable-region organ-path" d="M 62 898 C 62 846, 88 806, 124 800 C 113 820, 106 855, 106 898 C 106 942, 113 976, 124 996 C 88 990, 62 950, 62 898 Z" />
+                        <path id="epididymis-r" class="clickable-region organ-path" d="M 716 898 C 716 846, 690 806, 654 800 C 665 820, 672 855, 672 898 C 672 942, 665 976, 654 996 C 690 990, 716 950, 716 898 Z" />
+
+                        <path id="vas-deferens-l" class="clickable-region organ-path" d="M 82 846 C 70 726, 61 577, 68 420 C 74 286, 100 203, 149 169" fill="none" stroke="rgba(255,0,0,0)" stroke-width="34" stroke-linecap="round" />
+                        <path id="vas-deferens-r" class="clickable-region organ-path" d="M 703 860 C 736 830, 748 777, 728 740 C 709 705, 708 661, 726 626 C 744 589, 741 543, 711 508 C 684 476, 675 441, 684 400 C 713 282, 695 214, 621 174" fill="none" stroke="rgba(255,0,0,0)" stroke-width="34" stroke-linecap="round" />
+
+                        <path id="ureter-l" class="clickable-region organ-path" d="M 184 134 C 185 204, 203 261, 231 308" fill="none" stroke="rgba(255,0,0,0)" stroke-width="34" stroke-linecap="round" />
+                        <path id="ureter-r" class="clickable-region organ-path" d="M 584 134 C 583 204, 565 261, 537 308" fill="none" stroke="rgba(255,0,0,0)" stroke-width="34" stroke-linecap="round" />
+
+                        <path id="seminal-vesicle-l" class="clickable-region organ-path" d="M 244 352 C 276 331, 318 336, 348 362 C 362 384, 360 410, 340 428 C 314 444, 278 442, 248 424 C 228 404, 226 376, 244 352 Z" />
+                        <path id="seminal-vesicle-r" class="clickable-region organ-path" d="M 524 352 C 492 331, 450 336, 420 362 C 406 384, 408 410, 428 428 C 454 444, 490 442, 520 424 C 540 404, 542 376, 524 352 Z" />
+
+                        <path id="prostate-gland" class="clickable-region organ-path" d="M 312 516 C 332 500, 360 490, 384 490 C 408 490, 436 500, 456 516 C 454 552, 430 578, 384 586 C 338 578, 314 552, 312 516 Z" />
+                        <rect id="prostatic-urethra" class="clickable-region organ-path" x="372" y="477" width="24" height="116" rx="8" />
+                        <rect id="urethra-male" class="clickable-region organ-path" x="370" y="602" width="28" height="430" rx="10" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="svg-wrapper hidden" id="female-internal-wrapper">
+                <div class="anatomy-frame female-frame">
+                    <img src="female-anatomy.png" alt="Female Reproductive System" class="anatomy-image" />
+                    <svg class="image-overlay" viewBox="0 0 4210 3256" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                        <path id="fallopian-l" class="clickable-region organ-path" d="M 250 910 C 430 720, 680 610, 980 620 C 1250 628, 1490 714, 1685 820 C 1775 870, 1840 925, 1885 980" fill="none" stroke="rgba(255,0,0,0)" stroke-width="190" stroke-linecap="round" />
+                        <path id="fallopian-r" class="clickable-region organ-path" d="M 3960 910 C 3780 720, 3530 610, 3230 620 C 2960 628, 2720 714, 2525 820 C 2435 870, 2370 925, 2325 980" fill="none" stroke="rgba(255,0,0,0)" stroke-width="190" stroke-linecap="round" />
+                        <ellipse id="ovary-l" class="clickable-region organ-path" cx="420" cy="1160" rx="320" ry="235" />
+                        <ellipse id="ovary-r" class="clickable-region organ-path" cx="3790" cy="1160" rx="320" ry="235" />
+                        <path id="uterus" class="clickable-region organ-path" d="M 1860 860 C 1720 1020, 1700 1270, 1710 1520 C 1716 1700, 1762 1865, 1850 1990 C 1940 2098, 2030 2145, 2100 2145 C 2170 2145, 2260 2098, 2350 1990 C 2438 1865, 2484 1700, 2490 1520 C 2500 1270, 2480 1020, 2340 860 C 2210 730, 1990 730, 1860 860 Z" />
+                        <path id="cervix" class="clickable-region organ-path" d="M 1850 1990 C 1940 2098, 2030 2145, 2100 2145 C 2170 2145, 2260 2098, 2350 1990 C 2310 2120, 2240 2235, 2100 2295 C 1960 2235, 1890 2120, 1850 1990 Z" />
+                        <rect id="vagina" class="clickable-region organ-path" x="1900" y="2400" width="410" height="760" rx="170" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="svg-wrapper hidden" id="female-external-wrapper">
+                <div class="anatomy-frame female-frame">
+                    <img src="female-external.png" alt="Female External Genitalia" class="anatomy-image" />
+                    <svg class="image-overlay" viewBox="0 0 1225 1287" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                        <polygon id="mons-veneris" class="clickable-region organ-path" points="455,106 770,106 726,254 499,254" />
+                        <polygon id="labia-majora-l" class="clickable-region organ-path" points="474,316 552,356 548,900 503,958 438,900 424,458" />
+                        <polygon id="labia-majora-r" class="clickable-region organ-path" points="751,316 673,356 677,900 722,958 787,900 801,458" />
+                        <polygon id="labia-minora-l" class="clickable-region organ-path" points="560,406 607,494 594,802 558,848 531,770 528,560" />
+                        <polygon id="labia-minora-r" class="clickable-region organ-path" points="666,406 619,494 632,802 668,848 695,770 698,560" />
+                        <circle id="clitoris" class="clickable-region organ-path" cx="613" cy="352" r="30" />
+                        <path id="vestibule" class="clickable-region organ-path" d="M 562 498 L 664 498 L 688 748 L 538 748 Z M 613 554 m -20,0 a 20,20 0 1,0 40,0 a 20,20 0 1,0 -40,0" fill-rule="evenodd" />
+                        <circle id="urethral-opening" class="clickable-region organ-path" cx="613" cy="554" r="20" />
+                        <ellipse id="vaginal-opening" class="clickable-region organ-path" cx="613" cy="662" rx="39" ry="68" />
+                        <rect id="perineum" class="clickable-region organ-path" x="579" y="808" width="68" height="76" rx="20" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="organ-popup" id="organ-popup">
+            <h3 id="popup-title">Select an Organ</h3>
+            <p id="popup-desc">Click on a highlighted organ to center it and view the description.</p>
+            <p id="popup-phys">Scientific data will appear here.</p>
+        </div>
+    </div>
+</main>
+
+<footer>
+    <p>&copy; 2026 Computer Science | Human Reproduction</p>
+</footer>
+
+<script>
+    const data = {
+        male: {
+            external: {
+                shaft: {
+                    name: "Shaft",
+                    desc: "The main body of the penis extending from the pubic base to the glans.",
+                    phys: "Physiology: Contains erectile tissues (corpora cavernosa and corpus spongiosum) that fill with blood during arousal."
+                },
+                corona: {
+                    name: "Corona",
+                    desc: "The ridge that separates the glans from the shaft.",
+                    phys: "Physiology: Marks the transition between shaft skin and glans tissue and contributes to tactile sensation."
+                },
+                glans: {
+                    name: "Glans",
+                    desc: "The sensitive head of the penis.",
+                    phys: "Physiology: Richly innervated tissue that increases sensory function during touch and sexual stimulation."
+                },
+                "urethral-opening-male": {
+                    name: "Urethral Opening",
+                    desc: "The opening at the tip of the penis where urine and semen exit.",
+                    phys: "Physiology: Serves as the external outlet of the urethra for both urinary and reproductive functions."
+                },
+                scrotum: {
+                    name: "Scrotum",
+                    desc: "A skin sac that holds and protects the testes.",
+                    phys: "Physiology: Helps regulate testicular temperature by adjusting position relative to body heat."
+                }
+            },
+            internal: {
+                "testes-l": {
+                    name: "Testes",
+                    desc: "The testis on the left side of the scrotal sac.",
+                    phys: "Physiology: Produces sperm cells and the hormone testosterone."
+                },
+                "testes-r": {
+                    name: "Testes",
+                    desc: "The testis on the right side of the scrotal sac.",
+                    phys: "Physiology: Produces sperm cells and the hormone testosterone."
+                },
+                "epididymis-l": {
+                    name: "Epididymis",
+                    desc: "A coiled tube attached to each testis.",
+                    phys: "Physiology: Stores sperm and supports sperm maturation."
+                },
+                "epididymis-r": {
+                    name: "Epididymis",
+                    desc: "A coiled tube attached to each testis.",
+                    phys: "Physiology: Stores sperm and supports sperm maturation."
+                },
+                "vas-deferens-l": {
+                    name: "Vas Deferens",
+                    desc: "A tube that transports sperm from the testes toward the urethra.",
+                    phys: "Physiology: Carries mature sperm during ejaculation from the epididymis to the ejaculatory pathway."
+                },
+                "vas-deferens-r": {
+                    name: "Vas Deferens",
+                    desc: "A tube that transports sperm from the testes toward the urethra.",
+                    phys: "Physiology: Carries mature sperm during ejaculation from the epididymis to the ejaculatory pathway."
+                },
+                "seminal-vesicle-l": {
+                    name: "Seminal Vesicle",
+                    desc: "A gland located behind the bladder, near the end of the vas deferens.",
+                    phys: "Physiology: Produces fructose-rich seminal fluid that nourishes sperm and contributes a large portion of semen volume."
+                },
+                "seminal-vesicle-r": {
+                    name: "Seminal Vesicle",
+                    desc: "A gland located behind the bladder, near the end of the vas deferens.",
+                    phys: "Physiology: Produces fructose-rich seminal fluid that nourishes sperm and contributes a large portion of semen volume."
+                },
+                "urethra-male": {
+                    name: "Urethra",
+                    desc: "The straight channel running through the penis.",
+                    phys: "Physiology: Conducts urine and semen out of the body through the external opening."
+                },
+                "prostate-gland": {
+                    name: "Prostate Gland",
+                    desc: "The semicircular gland located above the penile body.",
+                    phys: "Physiology: Produces prostatic fluid, which helps nourish and protect sperm."
+                },
+                "prostatic-urethra": {
+                    name: "Prostatic Urethra",
+                    desc: "The urethral segment passing through the prostate gland.",
+                    phys: "Physiology: Receives prostatic secretions and continues urine/semen passage into the penile urethra."
+                },
+                "ureter-l": {
+                    name: "Ureter",
+                    desc: "One of the upper tubes entering the urinary bladder.",
+                    phys: "Physiology: Transports urine from the kidney to the bladder."
+                },
+                "ureter-r": {
+                    name: "Ureter",
+                    desc: "One of the upper tubes entering the urinary bladder.",
+                    phys: "Physiology: Transports urine from the kidney to the bladder."
+                }
+            }
+        },
+        female: {
+            internal: {
+                uterus: {
+                    name: "Uterus (Womb)",
+                    desc: "A hollow, pear-shaped organ located in the female pelvis.",
+                    phys: "Physiology: The site of fetal development during pregnancy. Its lining (endometrium) sheds during menstruation."
+                },
+                cervix: {
+                    name: "Cervix",
+                    desc: "The lower, narrow part of the uterus that connects to the vagina.",
+                    phys: "Physiology: Acts as a passage between uterus and vagina; cervical mucus changes through the cycle and the cervix dilates during labor."
+                },
+                "ovary-l": {
+                    name: "Ovaries",
+                    desc: "Small, oval-shaped glands located on either side of the uterus.",
+                    phys: "Physiology: They produce eggs (ova) and hormones like estrogen and progesterone."
+                },
+                "ovary-r": {
+                    name: "Ovaries",
+                    desc: "Small, oval-shaped glands located on either side of the uterus.",
+                    phys: "Physiology: They produce eggs (ova) and hormones like estrogen and progesterone."
+                },
+                vagina: {
+                    name: "Vagina",
+                    desc: "A muscular, hollow tube that extends from the vaginal opening to the cervix.",
+                    phys: "Physiology: Acts as the birth canal and the pathway for menstrual flow."
+                },
+                "fallopian-l": {
+                    name: "Fallopian Tubes",
+                    desc: "Narrow tubes that are attached to the upper part of the uterus.",
+                    phys: "Physiology: Serve as tunnels for the ova to travel from the ovaries to the uterus. Fertilization usually occurs here."
+                },
+                "fallopian-r": {
+                    name: "Fallopian Tubes",
+                    desc: "Narrow tubes that are attached to the upper part of the uterus.",
+                    phys: "Physiology: Serve as tunnels for the ova to travel from the ovaries to the uterus. Fertilization usually occurs here."
+                }
+            },
+            external: {
+                "mons-veneris": {
+                    name: "Mons Veneris",
+                    desc: "A soft fatty mound covering the pubic bone above the vulva.",
+                    phys: "Physiology: Provides a protective cushion over the pubic bone and becomes more prominent at puberty."
+                },
+                "labia-majora-l": {
+                    name: "Labia Majora",
+                    desc: "The outer folds of skin that surround and protect the vulva.",
+                    phys: "Physiology: Help protect the deeper external genital structures from friction and infection."
+                },
+                "labia-majora-r": {
+                    name: "Labia Majora",
+                    desc: "The outer folds of skin that surround and protect the vulva.",
+                    phys: "Physiology: Help protect the deeper external genital structures from friction and infection."
+                },
+                "labia-minora-l": {
+                    name: "Labia Minora",
+                    desc: "The smaller inner folds that frame the vestibule.",
+                    phys: "Physiology: Help protect the urethral and vaginal openings and increase blood flow during arousal."
+                },
+                "labia-minora-r": {
+                    name: "Labia Minora",
+                    desc: "The smaller inner folds that frame the vestibule.",
+                    phys: "Physiology: Help protect the urethral and vaginal openings and increase blood flow during arousal."
+                },
+                clitoris: {
+                    name: "Clitoris",
+                    desc: "A small, highly sensitive erectile structure located at the top of the vulva.",
+                    phys: "Physiology: Contains a dense concentration of nerve endings and plays an important role in sexual sensation."
+                },
+                vestibule: {
+                    name: "Vestibule",
+                    desc: "The area inside the labia minora where the openings are located.",
+                    phys: "Physiology: Houses the urethral opening and vaginal opening and serves as a protected entry space."
+                },
+                "urethral-opening": {
+                    name: "Urethral Opening",
+                    desc: "The external opening where urine leaves the body.",
+                    phys: "Physiology: Provides the exit for urine from the bladder."
+                },
+                "vaginal-opening": {
+                    name: "Vaginal Opening (Introitus)",
+                    desc: "The entrance to the vaginal canal.",
+                    phys: "Physiology: Serves as the lower opening of the reproductive tract and part of the birth canal."
+                },
+                perineum: {
+                    name: "Perineum",
+                    desc: "The area of skin and muscle between the vaginal opening and the anus.",
+                    phys: "Physiology: Supports the pelvic floor and contributes to stability of the pelvic organs."
+                }
+            }
+        }
+    };
+
+    let currentSystem = 'male';
+    let maleView = 'external';
+    let femaleView = 'internal';
+    let selectedPart = null;
+
+    function getActiveDataset() {
+        if (currentSystem === 'male') {
+            return data.male[maleView];
+        }
+        return data.female[femaleView];
+    }
+
+    function getModeText() {
+        if (currentSystem === 'male') {
+            return `Male ${maleView.charAt(0).toUpperCase() + maleView.slice(1)}`;
+        }
+        return `Female ${femaleView.charAt(0).toUpperCase() + femaleView.slice(1)}`;
+    }
+
+    function updateStatus() {
+        const dataset = getActiveDataset();
+        const selectedText = selectedPart && dataset[selectedPart] ? dataset[selectedPart].name : 'None';
+        document.getElementById('status-pill').innerText = `Mode: ${getModeText()} | Selected: ${selectedText}`;
+    }
+
+    function setActiveModeButton() {
+        const maleBtn = document.getElementById('male-btn');
+        const femaleBtn = document.getElementById('female-btn');
+        maleBtn.classList.toggle('is-active', currentSystem === 'male');
+        femaleBtn.classList.toggle('is-active', currentSystem === 'female');
+    }
+
+    function setActiveMaleViewButton() {
+        const internalBtn = document.getElementById('male-internal-btn');
+        const externalBtn = document.getElementById('male-external-btn');
+        if (!internalBtn || !externalBtn) {
+            return;
+        }
+        internalBtn.classList.toggle('is-active', currentSystem === 'male' && maleView === 'internal');
+        externalBtn.classList.toggle('is-active', currentSystem === 'male' && maleView === 'external');
+    }
+
+    function setActiveFemaleViewButton() {
+        const internalBtn = document.getElementById('female-internal-btn');
+        const externalBtn = document.getElementById('female-external-btn');
+        if (!internalBtn || !externalBtn) {
+            return;
+        }
+        internalBtn.classList.toggle('is-active', currentSystem === 'female' && femaleView === 'internal');
+        externalBtn.classList.toggle('is-active', currentSystem === 'female' && femaleView === 'external');
+    }
+
+    function setPopup(info) {
+        const popup = document.getElementById('organ-popup');
+
+        if (!info) {
+            popup.classList.remove('show');
+            document.getElementById('popup-title').innerText = 'Select an Organ';
+            document.getElementById('popup-desc').innerText = 'Click on a highlighted organ to center it and view the description.';
+            document.getElementById('popup-phys').innerText = 'Scientific data will appear here.';
+            return;
+        }
+
+        document.getElementById('popup-title').innerText = info.name;
+        document.getElementById('popup-desc').innerText = info.desc;
+        document.getElementById('popup-phys').innerText = info.phys;
+        popup.classList.add('show');
+    }
+
+    function resetView() {
+        const frames = document.querySelectorAll('.anatomy-frame');
+        frames.forEach(frame => {
+            frame.style.transform = 'translate(0px, 0px) scale(1)';
+            frame.classList.remove('zooming');
+        });
+    }
+
+    function resetSelection() {
+        selectedPart = null;
+        setPopup(null);
+        document.querySelectorAll('.organ-path').forEach(p => p.classList.remove('active-part'));
+        resetView();
+        updateStatus();
+    }
+
+    function applyView() {
+        const app = document.getElementById('app-container');
+        const maleExternalWrap = document.getElementById('male-external-wrapper');
+        const maleInternalWrap = document.getElementById('male-internal-wrapper');
+        const femaleInternalWrap = document.getElementById('female-internal-wrapper');
+        const femaleExternalWrap = document.getElementById('female-external-wrapper');
+        const maleViewToggle = document.getElementById('male-view-toggle');
+        const femaleViewToggle = document.getElementById('female-view-toggle');
+
+        app.classList.toggle('female-mode', currentSystem === 'female');
+        maleExternalWrap.classList.toggle('hidden', !(currentSystem === 'male' && maleView === 'external'));
+        maleInternalWrap.classList.toggle('hidden', !(currentSystem === 'male' && maleView === 'internal'));
+        femaleInternalWrap.classList.toggle('hidden', !(currentSystem === 'female' && femaleView === 'internal'));
+        femaleExternalWrap.classList.toggle('hidden', !(currentSystem === 'female' && femaleView === 'external'));
+        maleViewToggle.classList.toggle('hidden', currentSystem !== 'male');
+        femaleViewToggle.classList.toggle('hidden', currentSystem !== 'female');
+
+        setActiveModeButton();
+        setActiveMaleViewButton();
+        setActiveFemaleViewButton();
+        updateStatus();
+    }
+
+    function focusOnPart(partElement) {
+        const frame = partElement.ownerSVGElement.parentElement;
+        const box = partElement.getBBox();
+        const svg = partElement.ownerSVGElement;
+        const view = svg.viewBox.baseVal;
+        const centerX = box.x + box.width / 2;
+        const centerY = box.y + box.height / 2;
+        const dominantSize = Math.max(box.width, box.height);
+        const zoom = Math.min(2.3, Math.max(1.55, 64 / dominantSize));
+
+        const frameW = frame.clientWidth;
+        const frameH = frame.clientHeight;
+        const unitX = frameW / view.width;
+        const unitY = frameH / view.height;
+        const targetX = centerX * unitX;
+        const targetY = centerY * unitY;
+        const translateX = frameW / 2 - targetX * zoom;
+        const translateY = frameH / 2 - targetY * zoom;
+
+        frame.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoom})`;
+        frame.classList.add('zooming');
+    }
+
+    function switchSystem(system) {
+        currentSystem = system;
+        if (system === 'male') {
+            maleView = 'external';
+        }
+        if (system === 'female') {
+            femaleView = 'external';
+        }
+        resetSelection();
+        applyView();
+    }
+
+    function switchMaleView(view) {
+        if (currentSystem !== 'male') {
+            currentSystem = 'male';
+        }
+        maleView = view;
+        resetSelection();
+        applyView();
+    }
+
+    function switchFemaleView(view) {
+        if (currentSystem !== 'female') {
+            currentSystem = 'female';
+        }
+        femaleView = view;
+        resetSelection();
+        applyView();
+    }
+
+    function getZoomTarget(partElement) {
+        if (partElement.id === 'urethral-opening-male') {
+            return document.getElementById('glans') || partElement;
+        }
+        return partElement;
+    }
+
+    document.querySelectorAll('.organ-path').forEach(path => {
+        path.setAttribute('tabindex', '0');
+        path.setAttribute('role', 'button');
+        path.setAttribute('aria-label', path.id.replace(/-/g, ' '));
+
+        path.addEventListener('click', function() {
+            const zoomTarget = getZoomTarget(this);
+            const preserveZoom = this.id === 'urethral-opening-male';
+
+            document.querySelectorAll('.organ-path').forEach(p => p.classList.remove('active-part'));
+            if (!preserveZoom) {
+                resetView();
+            }
+
+            this.classList.add('active-part');
+            focusOnPart(zoomTarget);
+            selectedPart = this.id;
+
+            const info = getActiveDataset()[this.id];
+            if (info) {
+                setPopup(info);
+                updateStatus();
+            }
+        });
+
+        path.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                this.click();
+            }
+        });
+    });
+
+    document.querySelector('.diagram-container').addEventListener('click', function(event) {
+        if (!event.target.classList.contains('organ-path')) {
+            resetSelection();
+        }
+    });
+
+    applyView();
+    resetSelection();
+</script>
+
+
+</body>
+</html>
+
